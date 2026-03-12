@@ -14,20 +14,41 @@ public class RaidEngine {
     }
 
     public RaidResult runRaid(CombatNode teamA, CombatNode teamB, Skill teamASkill, Skill teamBSkill) {
-        // TODO: Validate inputs (null checks, alive checks, required skills).
-        // TODO: Implement round-based simulation:
-        // 1) Team A casts on Team B
-        // 2) Team B casts on Team A (if still alive)
-        // 3) Track rounds and log each step
-        // 4) Stop when one team is defeated (or max rounds reached)
-        //
-        // Optional extension:
-        // Use random for critical strikes or other deterministic events.
-        // Example: boolean critA = random.nextInt(100) < 10;
+        if (teamA == null || teamB == null || teamASkill == null || teamBSkill == null) {
+            throw new IllegalArgumentException("Teams and skills must not be null");
+        }
+
         RaidResult result = new RaidResult();
-        result.setRounds(0);
-        result.setWinner("TBD");
-        result.addLine("TODO: implement raid simulation");
+        int rounds = 0;
+
+        while (teamA.isAlive() && teamB.isAlive()) {
+            rounds++;
+            result.setRounds(rounds);
+
+            teamASkill.cast(teamB);
+            result.addLine("Round " + rounds + ": Team A used " + teamASkill.getSkillName() + " on Team B");
+
+            if (!teamB.isAlive()) {
+                result.setWinner("Team A");
+                result.addLine("Team B defeated.");
+                break;
+            }
+
+            teamBSkill.cast(teamA);
+            result.addLine("Round " + rounds + ": Team B used " + teamBSkill.getSkillName() + " on Team A");
+
+            if (!teamA.isAlive()) {
+                result.setWinner("Team B");
+                result.addLine("Team A defeated.");
+                break;
+            }
+
+        }
+        if (teamA.isAlive() && teamB.isAlive()) {
+            result.setWinner("Draw");
+            result.addLine("Max rounds reached or both teams still alive.");
+        }
+
         return result;
     }
 }
